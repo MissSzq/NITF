@@ -11,8 +11,10 @@ ex: $p{use_login1:data.uuid}， 表示需要从用例ui为use_login1响应中的
     use_login1的响应 {"res":200, "data":{"uuid":"xxx", token="yyy"}}。则可以获取到xxx
 data.uuid为jsonpath的查找规则，更多查找规则如下查阅：https://pypi.org/project/jsonpath-rw/
 
-$r{}, 内容为空的参数表示此处需要添加随机字符，主要用于有唯一性检查的地方
+$r{x}, 内容为空的参数表示此处需要添加随机字符，主要用于有唯一性检查的地方
 处理过程为默认添加4位随机的ascII字符（大小写字母和数字）
+x 为全局的变量，如果在第一个用例（任意地方）设置了$r{x}，那么任意地方使用$r{x}都会和第一个用例中的随机数一样
+当需要使用不同的随机数时，需要修改x参数的值，如$r{xyz}
 
 $s{}, 表示此处需要查询数据库，参数内容为SQL语句
 目前仅支持一条SQL查询一个字段内容，如 uuid=$s{select uuid from user where username='nemo'}
@@ -35,6 +37,10 @@ import string
 from conf import setting
 from lib import utils
 from jsonpath_rw import jsonpath, parse
+
+
+# 全局变量，用于存储随机数
+random_data = {}
 
 
 class GetAllCases:
@@ -152,8 +158,6 @@ class Case:
             # 否则依然是=格式，则进行拆分处理
             else:
                 return utils.set_request_data(self.get_data_dict(self.data))
-        else:
-            return
 
     @staticmethod
     def get_response_data(v, data):
@@ -165,17 +169,33 @@ class Case:
         """
         json_exe = parse(v)
         if not isinstance(data, dict):
-            data = json.loads(data)
-        return [match.value for match in json_exe.find(data)][0]
+            try:
+                data = json.loads(data)
+                result = [match.value for match in json_exe.find(data)][0]
+                return result
+            except TypeError:
+                raise ValueError('未能获取有效参数或给予的JSON路径不对，请检查参数设置！')
 
-    def _re_attr(self, attr, res, num=4):
+    @staticmethod
+    def set_random_data(v, num=4):
+        """
+        生成随机字符串，返回字典{v: random_str}
+        :param v: 用于标识随机变量，如$r{x}，x即使一个随机变量
+        :param num: 生成的字符串长度，默认4个字符
+        :return:
+        """
+        d = {}
+        value = ''.join(random.sample(string.ascii_letters + string.digits, num))
+        d[v] = value
+        return d
+
+    def _re_attr(self, attr, res):
         """
         通过正则表达式查找用例字段中是否存在参数，如果有参数则使用运算出的实际的值替换掉参数
         思路：使用正则表达式提取出当前字段中的所有参数。逐一进行处理，比如需要响应数据的、随机数、SQL查询结果的，在获取到这些数据
         后，采用正则表达式中的sub方法替换掉其中的第一个参数，一次只处理一个参数，通过for循环将所有参数替换为实际的值
         :param attr: 字段的值，也就是excel中的一个单元格，当然实际应该只会出现在url，响应和预期结果三个字段中
         :param res: 依赖用例的响应数据
-        :param num: 生成随机数的位数
         :return:
         """
         params = self.param_re.findall(attr)
@@ -192,18 +212,24 @@ class Case:
                     except IndexError:
                         raise ValueError('未能从指定用例的响应中取回依赖数据，请检查参数设置或用例的执行顺序！')
                     # 将值替换第一个参数
-                    attr = self.param_re.sub(value, attr, 1)
+                    attr = self.param_re.sub(str(value), attr, 1)
                 elif k == 'r':
                     # 如果参数是$r{}形式,则使用随机函数生成的4个字符替换
-                    value = ''.join(random.sample(string.ascii_letters+string.digits, num))
-                    attr = self.param_re.sub(value, attr, 1)
+                    # value = ''.join(random.sample(string.ascii_letters+string.digits, num))
+                    # 如果全局变量random_data中已存在$r{key}相同的key，则重用之前的随机数
+                    if v not in random_data:
+                        random_data.update(self.set_random_data(v))
+                        value = random_data.get(v)
+                    else:
+                        value = random_data.get(v)
+                    attr = self.param_re.sub(str(value), attr, 1)
                 elif k == 's':
                     # 如果参数是$s{}, 则需要执行其中的SQL语句
                     # sql = self._re_attr(v, res)
                     value = utils.get_data_by_sql(v)
                     if not value:
                         value = 'null'
-                    attr = self.param_re.sub(value, attr, 1)
+                    attr = self.param_re.sub(str(value), attr, 1)
         return attr
 
     def get_url(self, res):
@@ -227,13 +253,14 @@ class Case:
             self.data = self._re_attr(self.data, res)
             # 如果data字段类似{"a":1, "b":2}这种格式，那么认为这是一个json格式的数据
             if self.data.startswith('{') and self.data.endswith('}'):
-                data = json.loads(self.data, encoding='utf-8')
-                return utils.set_request_data(data)
+                try:
+                    data = json.loads(self.data, encoding='utf-8')
+                    return utils.set_request_data(data)
+                except Exception:
+                    raise ValueError('用例id:%s 字段data中的数据不是有效的JSON格式数据，请检查！')
             # 否则依然是=格式，则进行拆分处理
             else:
                 return utils.set_request_data(self.get_data_dict(self.data))
-        else:
-            return
 
     def get_check(self, res):
         """
