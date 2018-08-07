@@ -5,6 +5,7 @@ from conf.setting import *
 
 def set_request_data(params, key=None, secret=None):
     """
+    # TODO: 小白接口需要签名，签名设置函数utils.set_request_data，可根据实际情况修改
     根据小白接口的规则生成签名
     :param params: 请求中的所有参数
     :param key:
@@ -27,6 +28,7 @@ def set_request_data(params, key=None, secret=None):
 
 def set_md5(pwd):
     """
+    # TODO: 小白接口密码采用MD5加密，可根据实际情况修改
     通过MD5加密传输的密码
     :param pwd:
     :return:
@@ -49,12 +51,14 @@ def set_res_data(res):
 
 
 def get_data_by_sql(sql, *args):
+    # TODO: 采用sqlite3作为演示，可根据需要修改
     conn = sqlite3.connect(SQL_CONFIG)
     cur = conn.cursor()
     return cur.execute(sql, args).fetchone()[0]
 
 
 def get_datas_by_sql(sql, *args):
+    # TODO: 采用sqlite3作为演示，可根据需要修改
     conn = sqlite3.connect(SQL_CONFIG)
     cur = conn.cursor()
     return cur.execute(sql, args).fetchall()
