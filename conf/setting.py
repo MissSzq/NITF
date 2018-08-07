@@ -18,8 +18,8 @@ REPORT_PATH = os.path.join(BASE_PATH, 'report')
 FILE_NAME = ''
 
 # 服务相关配置
-APP_KEY = 'DA8ED0D9F1D522934AFCB6552A45DE02'
-APP_SECRET = 'DBQjXjmZRwmgaaWPtm66xpV1enCPkZcxfxWyS2Hh5ewZvSLC7PV0uJyo2uGZkKgOVOFxsbR'
+APP_KEY = 'Nemo\'s Interface Test Framework'
+APP_SECRET = 'Nemo\'s Interface Test Framework'
 
 # 数据库配置
 # SQL_CONFIG = {

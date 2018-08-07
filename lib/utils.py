@@ -52,15 +52,15 @@ def set_res_data(res):
 
 def get_data_by_sql(sql, *args):
     # TODO: 采用sqlite3作为演示，可根据需要修改
-    conn = sqlite3.connect(SQL_CONFIG)
-    cur = conn.cursor()
-    return cur.execute(sql, args).fetchone()[0]
+    with sqlite3.connect(SQL_CONFIG) as conn:
+        cur = conn.cursor()
+        return cur.execute(sql, args).fetchone()[0]
 
 
 def get_datas_by_sql(sql, *args):
     # TODO: 采用sqlite3作为演示，可根据需要修改
-    conn = sqlite3.connect(SQL_CONFIG)
-    cur = conn.cursor()
-    return cur.execute(sql, args).fetchall()
+    with sqlite3.connect(SQL_CONFIG) as conn:
+        cur = conn.cursor()
+        return cur.execute(sql, args).fetchall()
 
 

@@ -13,7 +13,7 @@ def _generate_file(sheet_name):
     :return:
     """
     file_name = 'test_%s.py' % sheet_name.lower()
-    template_file = os.path.join(setting.BASE_PATH, 'conf/template.txt')
+    template_file = os.path.join(setting.BASE_PATH, 'conf', 'template.txt')
     with open(template_file, 'r', encoding='utf-8') as template:
         content = template.read().format(class_name=sheet_name.replace('_', ''),
                                          data_name=sheet_name,
