@@ -1,5 +1,4 @@
 """
-# TODO: 处理用例
 GetAllCases 获取data中所有excel中的用例
 APICases 一个excel中的sheet页的用例生成一个对象，主要用于生成测试用例文件。一个测试用例文件对应excel中的一个sheet页
 Case 处理每一个具体的用例（一行），配合unittest生成测试用例的执行过程。主要实现测试用例的数据、断言、依赖等
