@@ -133,7 +133,7 @@ class Case:
         if not data:
             return
         res = {}
-        data = [d for d in data.split(setting.SEP) if d]
+        data = [d.strip() for d in data.split(setting.SEP) if d]
         for d in data:
             k, v = d.split('=')
             # 如果报文中涉及密码，需要进行加密传输
@@ -220,6 +220,11 @@ class Case:
         在URL中找是否有参数，如果有参数，则计算参数的值并更新URL
         :return:
         """
+        if self.url:
+            # 去前后空格
+            self.url = self.url.strip()
+        else:
+            raise ValueError('用例中没有有效的url，请检查url字段。')
         return self._re_attr(self.url, res)
 
     def get_data(self, res):

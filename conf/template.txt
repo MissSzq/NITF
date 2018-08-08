@@ -34,6 +34,8 @@ class {class_name}(unittest.TestCase):
         elif case.method.lower() == 'get':
             r = requests.get(case.url, params=data)
             res = r.text
+        else:
+            raise ValueError('请选择get或post方式, 目前仅支持这两种方式。')
         # 将结果以字典存储在属性中
         self.response[case.id] = res
 
