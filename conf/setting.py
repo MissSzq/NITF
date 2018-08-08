@@ -4,6 +4,14 @@ import pymysql
 
 API_URL = 'http://hn2.api.okayapi.com/'
 
+# 是否需要签名
+IS_SIGN = True
+
+# 密码是否要加密
+IS_MD5 = True
+# 需要加密的参数名
+MD5_FIELDS = {'password', }
+
 # 路径配置
 BASE_PATH = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
@@ -18,8 +26,8 @@ REPORT_PATH = os.path.join(BASE_PATH, 'report')
 FILE_NAME = ''
 
 # 服务相关配置
-APP_KEY = 'Nemo\'s Interface Test Framework'
-APP_SECRET = 'Nemo\'s Interface Test Framework'
+APP_KEY = 'DA8ED0D9F1D522934AFCB6552A45DE02'
+APP_SECRET = 'DBQjXjmZRwmgaaWPtm66xpV1enCPkZcxfxWyS2Hh5ewZvSLC7PV0uJyo2uGZkKgOVOFxsbR'
 
 # 数据库配置
 # SQL_CONFIG = {

@@ -15,7 +15,7 @@ class RegisterFlow(unittest.TestCase):
     @ddt.data(*cases.get('Register_Flow'))
     def test_register_flow(self, data):
         case = Case(data)
-        self._testMethodDoc = case.desc
+        # self._testMethodDoc = case.desc
 
         url = case.get_url(self.response)
 

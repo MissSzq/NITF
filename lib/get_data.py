@@ -137,27 +137,10 @@ class Case:
         for d in data:
             k, v = d.split('=')
             # 如果报文中涉及密码，需要进行加密传输
-            if k == 'password':
-                res[k] = utils.set_md5(v)
-            else:
-                res[k] = v
+            if setting.IS_MD5 and k in setting.MD5_FIELDS:
+                v = utils.set_md5(v)
+            res[k] = v
         return res
-
-    def get_request_data(self):
-        """
-        处理请求数据，将请求数据从s=App.User.Login,username=first,password=asdf1234，
-        处理为{'s': 'App.User.Login', 'username': 'first', 'password': '1ADBB3178591FD5BB0C248518F39BF6D'}
-        :return: 返回请求需要的数据
-        """
-        if self.data:
-            self.data = self.data.strip()
-            # 如果data字段类似{"a":1, "b":2}这种格式，那么认为这是一个json格式的数据
-            if self.data.startswith('{') and self.data.endswith('}'):
-                data = json.loads(self.data, encoding='utf-8')
-                return utils.set_request_data(data)
-            # 否则依然是=格式，则进行拆分处理
-            else:
-                return utils.set_request_data(self.get_data_dict(self.data))
 
     @staticmethod
     def get_response_data(v, data):
@@ -256,12 +239,23 @@ class Case:
             if self.data.startswith('{') and self.data.endswith('}'):
                 try:
                     data = json.loads(self.data, encoding='utf-8')
-                    return utils.set_request_data(data)
+                    for field in setting.MD5_FIELDS:
+                        need_md5 = data.get(field)
+                        if need_md5:
+                            data[field] = utils.set_md5(need_md5)
+                    # 如果不需要签名
+                    if setting.IS_SIGN:
+                        return utils.set_request_data(data)
+                    else:
+                        return data
                 except Exception:
                     raise ValueError('用例id:%s 字段data中的数据不是有效的JSON格式数据，请检查！')
             # 否则依然是=格式，则进行拆分处理
             else:
-                return utils.set_request_data(self.get_data_dict(self.data))
+                if setting.IS_SIGN:
+                    return utils.set_request_data(self.get_data_dict(self.data))
+                else:
+                    return self.get_data_dict(self.data)
 
     def get_check(self, res):
         """
