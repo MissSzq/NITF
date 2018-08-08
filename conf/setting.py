@@ -24,6 +24,8 @@ REPORT_PATH = os.path.join(BASE_PATH, 'report')
 
 # 测试时自动查找excel用例文件的通配符
 FILE_NAME = ''
+# 定义excel中data与check的分隔符
+SEP = ';'
 
 # 服务相关配置
 APP_KEY = 'DA8ED0D9F1D522934AFCB6552A45DE02'

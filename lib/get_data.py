@@ -133,7 +133,7 @@ class Case:
         if not data:
             return
         res = {}
-        data = [d for d in data.split(';') if d]
+        data = [d for d in data.split(setting.SEP) if d]
         for d in data:
             k, v = d.split('=')
             # 如果报文中涉及密码，需要进行加密传输
@@ -265,6 +265,6 @@ class Case:
         """
         if self.check:
             self.check = self._re_attr(self.check, res)
-            return [c for c in self.check.split(';') if c]
+            return [c for c in self.check.split(setting.SEP) if c]
         else:
             raise ValueError('测试用例中不能没有结果检查！')
